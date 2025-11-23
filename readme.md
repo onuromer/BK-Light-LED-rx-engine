@@ -4,7 +4,7 @@
 ![Platform: BLE](https://img.shields.io/badge/Platform-BLE-blue.svg)
 ![Reverse Engineering](https://img.shields.io/badge/Reverse%20Engineered-Yes-red.svg)
 
-This repository contains a small toolkit, rendering pipeline, and example apps (like a Snake game and a digital clock) for the **B.K. Light LED Fun Screen 64×16**, a cheap LED matrix I bought out of curiosity at **Action** for around **20€ / 85 zł**.  
+This repository contains a small toolkit, rendering pipeline, and example apps (like a [Spotify Widget](https://github.com/mx2rel/BK-Light-LED-rx-engine/tree/Spotify-widget), Snake game and a digital clock) for the **B.K. Light LED Fun Screen 64×16**, a cheap LED matrix I bought out of curiosity at **Action** for around **20€ / 85 zł**.  
 It was a pure hobby project done over the course of **~6 hours across 2 days**, just for fun.
 
 > **Device:** LED Fun Screen 64×16  
@@ -118,6 +118,7 @@ Most of the time the device works with little to no delay, but under heavy conti
 
 ## 🕹️ Examples Included
 
+- 🎵 [Spotify widget](https://github.com/mx2rel/BK-Light-LED-rx-engine/tree/Spotify-widget)
 - 🐍 Snake game
 - ⏰ Digital Clock
 - 🎨 Basic pixel drawing utilities
