@@ -37,7 +37,9 @@ function updatePanelDisplay() {
     const gridElement = document.getElementById('grid-container');
     if (gridElement) {
         gridElement.style.setProperty('--grid-columns', WIDTH);
+        gridElement.style.setProperty('--grid-rows', HEIGHT);
         gridElement.style.setProperty('--grid-aspect', `${WIDTH} / ${HEIGHT}`);
+        syncGridHeight(gridElement);
     }
 
     const canvas = document.getElementById('canvas');
@@ -54,6 +56,14 @@ function updatePanelDisplay() {
     const presetSelect = document.getElementById('panelPreset');
     if (presetSelect) {
         presetSelect.value = activePanelPreset;
+    }
+}
+
+function syncGridHeight(gridElement) {
+    if (!gridElement) return;
+    const width = gridElement.clientWidth;
+    if (width > 0) {
+        gridElement.style.height = `${Math.round((width * HEIGHT) / WIDTH)}px`;
     }
 }
 
@@ -76,6 +86,10 @@ function applyPanelPreset(presetKey) {
 
 initPixels();
 updatePanelDisplay();
+window.addEventListener('resize', () => {
+    const gridElement = document.getElementById('grid-container');
+    syncGridHeight(gridElement);
+});
 
 let transaction = false;
 
