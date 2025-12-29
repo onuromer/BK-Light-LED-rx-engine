@@ -60,15 +60,17 @@
         }
 
         #grid-container {
+            --grid-columns: 64;
+            --grid-aspect: 64 / 16;
             display: grid;
-            grid-template-columns: repeat(64, 1fr);
+            grid-template-columns: repeat(var(--grid-columns), 1fr);
             gap: 1px;
             background: #000;
             border: 2px solid #444;
             width: 95vw;
             max-width: 1280px;
             margin: 0 auto;
-            aspect-ratio: 64/16;
+            aspect-ratio: var(--grid-aspect);
         }
 
         .pixel {
@@ -118,13 +120,20 @@
 
 <body>
 
-    <h1>BLE Matrix (64x16)</h1>
+    <h1 id="panel-title">BLE Matrix (64x16)</h1>
 
     <div class="controls">
         <button id="btnConnect" class="green">Connect Bluetooth</button>
         <button id="btnDisconnect" class="red" disabled>Disconnect</button>
         <br><br>
         <label>Draw Color: <input type="color" id="colorPicker" value="#ff0000"></label>
+        <br><br>
+        <label>Panel:
+            <select id="panelPreset">
+                <option value="64x16">64x16</option>
+                <option value="32x32">32x32</option>
+            </select>
+        </label>
         <br><br>
         <div id="toolbox"></div>
     </div>
@@ -155,6 +164,10 @@
             await disconnect();
             document.getElementById('status').innerText = "Status: Disconnected";
             updateUIState();
+        });
+
+        document.getElementById('panelPreset').addEventListener('change', (event) => {
+            applyPanelPreset(event.target.value);
         });
 
         function updateUIState() {
