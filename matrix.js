@@ -1,19 +1,81 @@
 const SERVICE_UUID = "000000fa-0000-1000-8000-00805f9b34fb";
 const CHAR_WRITE_UUID = "0000fa02-0000-1000-8000-00805f9b34fb";
 
-const WIDTH = 64;
-const HEIGHT = 16;
+const PANEL_PRESETS = {
+    "64x16": {
+        width: 64,
+        height: 16,
+        fullFrameHeader: [0x09, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00]
+    },
+    "32x32": {
+        width: 32,
+        height: 32,
+        fullFrameHeader: [0x09, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00]
+    }
+};
+
+let activePanelPreset = "64x16";
+let WIDTH = PANEL_PRESETS[activePanelPreset].width;
+let HEIGHT = PANEL_PRESETS[activePanelPreset].height;
+let fullFrameHeader = PANEL_PRESETS[activePanelPreset].fullFrameHeader;
 
 let device, server, service, characteristic;
 let isConnected = false;
 let pixels = [];
 
-for (let x = 0; x < WIDTH; x++) {
-    pixels[x] = [];
-    for (let y = 0; y < HEIGHT; y++) {
-        pixels[x][y] = "000000";
+function initPixels() {
+    pixels = [];
+    for (let x = 0; x < WIDTH; x++) {
+        pixels[x] = [];
+        for (let y = 0; y < HEIGHT; y++) {
+            pixels[x][y] = "000000";
+        }
     }
 }
+
+function updatePanelDisplay() {
+    const gridElement = document.getElementById('grid-container');
+    if (gridElement) {
+        gridElement.style.setProperty('--grid-columns', WIDTH);
+        gridElement.style.setProperty('--grid-aspect', `${WIDTH} / ${HEIGHT}`);
+    }
+
+    const canvas = document.getElementById('canvas');
+    if (canvas) {
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+    }
+
+    const title = document.getElementById('panel-title');
+    if (title) {
+        title.textContent = `BLE Matrix (${WIDTH}x${HEIGHT})`;
+    }
+
+    const presetSelect = document.getElementById('panelPreset');
+    if (presetSelect) {
+        presetSelect.value = activePanelPreset;
+    }
+}
+
+function applyPanelPreset(presetKey) {
+    const preset = PANEL_PRESETS[presetKey];
+    if (!preset) return;
+
+    activePanelPreset = presetKey;
+    WIDTH = preset.width;
+    HEIGHT = preset.height;
+    fullFrameHeader = preset.fullFrameHeader;
+
+    initPixels();
+    updatePanelDisplay();
+
+    if (typeof initGrid === "function") {
+        initGrid();
+    }
+}
+
+initPixels();
+updatePanelDisplay();
 
 let transaction = false;
 
@@ -64,7 +126,7 @@ function onDisconnected() {
 
 
 async function setPixel(x, y, hex) {
-    if (x > WIDTH || y > HEIGHT) return;
+    if (x >= WIDTH || y >= HEIGHT) return;
 
 
     const r = parseInt(hex.slice(0, 2), 16);
@@ -105,7 +167,7 @@ async function sendFullFrame(rgbData) {
     updateInProgress = true;
     if (!isConnected) { log("Not connected"); return; }
 
-    const header = new Uint8Array([0x09, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00]);
+    const header = new Uint8Array(fullFrameHeader);
 
     const fullPayload = new Uint8Array(header.length + rgbData.length);
     fullPayload.set(header);
