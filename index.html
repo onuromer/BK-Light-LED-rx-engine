@@ -145,20 +145,27 @@
     <div id="grid-container"></div>
     <div id="log"></div>
 
-    <canvas id="canvas" width="64" height="16"></canvas>
+    <canvas id="canvas" width="32" height="32"></canvas>
     <script src="matrix.js"></script>
     <script src="grid.js"></script>
     <script src="toolbox.js"></script>
     <script src="shapes.js"></script>
     <script src="image.js"></script>
     <script src="text.js"></script>
-    <script src="smartPaint.js"></script>
-    <!-- <script src="paint.js"></script> -->
+    <!-- <script src="smartPaint.js"></script> -->
+    <script src="paint.js"></script>
     <script>
 
         document.getElementById('btnConnect').addEventListener('click', async () => {
-            await connectBluetooth();
-            document.getElementById('status').innerText = `Connected to ${device.name}`;
+            try {
+                await connectBluetooth();
+                const deviceName = (typeof device !== "undefined" && device && device.name) ? device.name : "device";
+                document.getElementById('status').innerText = `Connected to ${deviceName}`;
+            } catch (err) {
+                const message = err && err.message ? err.message : "Could not connect to device.";
+                document.getElementById('status').innerText = `Connect failed: ${message}`;
+                if (typeof log === "function") { log(message); }
+            }
             updateUIState();
         });
 
@@ -173,9 +180,25 @@
         });
 
         function updateUIState() {
-            document.getElementById('btnConnect').disabled = isConnected;
-            document.getElementById('btnDisconnect').disabled = !isConnected;
+            const connectBtn = document.getElementById('btnConnect');
+            const disconnectBtn = document.getElementById('btnDisconnect');
+            const support = (typeof BLUETOOTH_SUPPORT !== "undefined") ? BLUETOOTH_SUPPORT : { available: true, reason: "" };
+
+            if (connectBtn) {
+                connectBtn.disabled = isConnected || !support.available;
+                connectBtn.title = support.available ? "" : support.reason;
+            }
+            if (disconnectBtn) {
+                disconnectBtn.disabled = !isConnected;
+            }
+
+            const statusEl = document.getElementById('status');
+            if (statusEl && !support.available) {
+                statusEl.innerText = `Status: ${support.reason}`;
+            }
         }
+
+        updateUIState();
 
     </script>
 </body>

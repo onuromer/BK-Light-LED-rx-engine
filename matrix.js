@@ -19,6 +19,21 @@ let WIDTH = PANEL_PRESETS[activePanelPreset].width;
 let HEIGHT = PANEL_PRESETS[activePanelPreset].height;
 let fullFrameHeader = PANEL_PRESETS[activePanelPreset].fullFrameHeader;
 
+const BLUETOOTH_SUPPORT = (() => {
+    const hasNavigator = typeof navigator !== "undefined";
+    if (!hasNavigator || !navigator.bluetooth) {
+        return { available: false, reason: "Web Bluetooth not supported in this browser." };
+    }
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+        return { available: false, reason: "Web Bluetooth requires HTTPS or localhost." };
+    }
+    return { available: true, reason: "" };
+})();
+
+if (typeof window !== "undefined") {
+    window.BLUETOOTH_SUPPORT = BLUETOOTH_SUPPORT;
+}
+
 let device, server, service, characteristic;
 let isConnected = false;
 let pixels = [];
@@ -100,6 +115,12 @@ function log(msg) {
 }
 
 async function connectBluetooth() {
+    if (!BLUETOOTH_SUPPORT.available) {
+        const msg = BLUETOOTH_SUPPORT.reason;
+        log(msg);
+        throw new Error(msg);
+    }
+
     log("Requesting device...");
     device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
